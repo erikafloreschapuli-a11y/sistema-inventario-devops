@@ -19,6 +19,7 @@ def main():
 
     resultado = buscar_producto(inventario, "mouse")
     print(f"Busqueda 'mouse': {len(resultado)} producto(s) encontrado(s)")
+    print(f"Valor total del inventario: {calcular_valor_total(inventario)}")
     print("Sistema ejecutado correctamente.")
 
 
