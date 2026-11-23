@@ -1,0 +1,45 @@
+name: Liberacion del Sistema de Inventario
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version a liberar (por ejemplo v1.0.0)'
+        required: true
+
+permissions:
+  contents: write
+
+env:
+  VERSION: ${{ github.event.inputs.version || github.ref_name }}
+
+jobs:
+  liberar:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Ejecutar pruebas
+        run: python -m unittest discover -s tests -v
+
+      - name: Crear paquete
+        run: zip -r sistema-inventario-${VERSION}.zip src/
+
+      - name: Publicar version
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.VERSION }}
+          target_commitish: ${{ github.sha }}
+          name: ${{ env.VERSION }} - Sistema de Inventario
+          files: sistema-inventario-${{ env.VERSION }}.zip
+          generate_release_notes: true
