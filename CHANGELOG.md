@@ -14,3 +14,8 @@
 ## v1.0.2
 - Corrección del error detectado durante las pruebas.
 - Validación satisfactoria de la funcionalidad Producto.
+
+## v1.1.0
+- Se agregó el cálculo del valor total del inventario.
+- Al desplegarla, el programa falló (NameError) y el workflow de despliegue recuperó automáticamente la v1.0.2.
+- El cambio defectuoso se revirtió en la rama main.
