@@ -15,7 +15,7 @@ class Producto:
         informacion = (
             f"Codigo: {self.codigo}\n"
             f"Nombre: {self.nombre}\n"
-            f"Precio: {self.precio}\n"
+            f"Precio: {self.precio * 2}\n"
             f"Existencia: {self.existencia}"
         )
         print(informacion)
