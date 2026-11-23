@@ -1,0 +1,31 @@
+name: Build del Sistema de Inventario
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar el codigo
+        uses: actions/checkout@v4
+
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Compilar el proyecto
+        run: python -m compileall -q src
+
+      - name: Ejecutar el programa
+        run: python src/producto.py
+
+      - name: Informar resultado
+        if: success()
+        run: echo "Build correcto del Sistema de Inventario"
