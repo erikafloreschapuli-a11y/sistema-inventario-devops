@@ -1,7 +1,7 @@
 """Modulo Producto del Sistema de Inventario."""
 
 
-class Producto
+class Producto:
     """Representa un producto dentro del inventario."""
 
     def __init__(self, codigo, nombre, precio, existencia):
