@@ -25,4 +25,5 @@ class Producto:
 if __name__ == "__main__":
     producto = Producto("P001", "Teclado", 350, 10)
     producto.mostrar_informacion()
+    print("Producto registrado")
     print("Producto disponible")
