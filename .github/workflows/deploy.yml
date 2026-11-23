@@ -1,0 +1,74 @@
+name: Despliegue del Sistema de Inventario
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version a desplegar (por ejemplo v1.0.2)'
+        required: true
+        default: 'v1.0.2'
+      version_anterior:
+        description: 'Version estable para recuperar si el despliegue falla'
+        required: true
+        default: 'v1.0.2'
+
+permissions:
+  contents: read
+
+env:
+  VERSION: ${{ github.event.inputs.version }}
+  VERSION_ANTERIOR: ${{ github.event.inputs.version_anterior }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Preparar entorno de destino
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Verificar requisitos del entorno
+        run: python --version
+
+      - name: Descargar version liberada desde GitHub Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download "$VERSION" --repo "$GITHUB_REPOSITORY" --pattern "sistema-inventario-$VERSION.zip"
+
+      - name: Preparar directorio de despliegue
+        run: |
+          mkdir -p despliegue/version-$VERSION
+          unzip -o sistema-inventario-$VERSION.zip -d despliegue/version-$VERSION
+
+      - name: Verificar archivos
+        run: ls -R despliegue
+
+      - name: Ejecutar y verificar el sistema
+        id: ejecutar
+        continue-on-error: true
+        run: |
+          cd despliegue/version-$VERSION
+          python src/main.py
+
+      - name: Recuperar version anterior (rollback)
+        if: steps.ejecutar.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "La version $VERSION fallo. Recuperando $VERSION_ANTERIOR..."
+          gh release download "$VERSION_ANTERIOR" --repo "$GITHUB_REPOSITORY" --pattern "sistema-inventario-$VERSION_ANTERIOR.zip" --clobber
+          mkdir -p despliegue/version-$VERSION_ANTERIOR
+          unzip -o sistema-inventario-$VERSION_ANTERIOR.zip -d despliegue/version-$VERSION_ANTERIOR
+          cd despliegue/version-$VERSION_ANTERIOR
+          python src/main.py
+          echo "Version $VERSION_ANTERIOR restaurada correctamente."
+
+      - name: Resultado del despliegue
+        run: |
+          if [ "${{ steps.ejecutar.outcome }}" = "success" ]; then
+            echo "Despliegue de $VERSION completado correctamente."
+          else
+            echo "Despliegue de $VERSION fallido; se restauro $VERSION_ANTERIOR."
+          fi
